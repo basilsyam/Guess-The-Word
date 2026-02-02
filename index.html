@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wordle Basel Edition</title>
+    <link rel="stylesheet" href="guess.css">
+</head>
+<body>
+    <h1>Guess The Word</h1>
+    <div class="guess-game">
+        <div class="game-area">
+            <div class="category-area">
+                <div class="select-group">
+                    <label>Choose Category:</label>
+                    <select id="category-select"></select>
+                </div>
+                <button id="new-game-btn">New</button>
+            </div>
+            <div class="input-container"></div>
+            <div class="control">
+                <button class="check">Check Word</button>
+                <button class="hint"><span>2</span> Hint</button>
+            </div>
+            <div class="message"></div>
+        </div>
+        <div class="key-colors">
+            <div class="key-color"><div class="key in-place"></div><span>Correct Place</span></div>
+            <div class="key-color"><div class="key not-in-place"></div><span>Wrong Place</span></div>
+            <div class="key-color"><div class="key no"></div><span>Not Exist</span></div>
+        </div>
+    </div>
+    <footer></footer>
+    <script src="guess.js"></script>
+</body>
+</html>
