@@ -1,5 +1,5 @@
 const gameData = {
-    // تم الإبقاء على كافة المجالات (أكثر من 30 مجال)
+    // تم الإبقاء على كافة المجالات كما هي
     "Medicine": ["BIOPSY", "PLASMA", "ENZYME", "GLUCOSE", "PLATELET", "ALBUMIN", "REAGENT", "CULTURE", "PIPETTE", "SEROLOGY", "LIPIDS", "SEPSIS", "ANEMIA", "SYRINGE", "LANCET", "IMMUNE", "SUTURES", "TRAUMA", "CANULA", "DIALYSIS"],
     "Engineering": ["CIRCUIT", "VOLTAGE", "BATTERY", "SENSOR", "CURRENT", "TURBINE", "RESISTOR", "DIODE", "TRANSISTOR", "WATTAGE", "GRID", "SOLAR", "ROBOTICS", "SIGNAL", "MOTORS", "ENGINE", "TORQUE", "WIRING", "PANEL", "SAFETY"],
     "Software": ["FRONTEND", "BACKEND", "DATABASE", "VARIABLE", "FUNCTION", "ITERATION", "COMPILER", "DEBUGGING", "FRAMEWORK", "RECURSION", "PROTOCOL", "INSTANCE", "ABSTRACT", "INTERFACE", "SOFTWARE", "HARDWARE", "TERMINAL", "DECODER", "ENCRYPTION", "NETWORK"],
@@ -32,40 +32,85 @@ const gameData = {
     "Sports": ["SOCCER", "TENNIS", "RUN", "JUMP", "SWIM", "GOLF", "BALL", "GAME", "MATCH", "TEAM", "WIN", "PLAY", "GOAL", "BASE", "BIKE", "SKATE", "FISH", "DIVE", "CLIMB", "SURF"]
 };
 
-let wordToGuess = ""; let currentTry = 1; let numberOfHints = 2;
+let wordToGuess = ""; 
+let currentTry = 1; 
+let numberOfHints = 2;
 const inputContainer = document.querySelector(".input-container");
 const categorySelect = document.getElementById("category-select");
 const checkButton = document.querySelector(".check");
 const hintButton = document.querySelector(".hint");
 const messageArea = document.querySelector(".message");
 
+// --- الإصلاح المنطقي في دالة التحقق ---
+function check() {
+    const inps = document.querySelectorAll(`.row-wrapper.try-${currentTry} input`);
+    const guessArr = Array.from(inps).map(i => i.value.toUpperCase());
+    const targetArr = wordToGuess.split("");
+    const resultClasses = new Array(guessArr.length).fill("no"); // افتراضياً الحرف غير موجود
+
+    // المرحلة الأولى: تحديد الأماكن الصحيحة (الأخضر)
+    guessArr.forEach((char, i) => {
+        if (char === targetArr[i]) {
+            resultClasses[i] = "yes-in-place";
+            targetArr[i] = null; // استهلاك الحرف من الكلمة الهدف
+        }
+    });
+
+    // المرحلة الثانية: تحديد الأماكن الخاطئة (الأصفر)
+    guessArr.forEach((char, i) => {
+        if (resultClasses[i] !== "yes-in-place") {
+            const indexInTarget = targetArr.indexOf(char);
+            if (indexInTarget !== -1) {
+                resultClasses[i] = "not-in-place";
+                targetArr[indexInTarget] = null; // استهلاك الحرف
+            }
+        }
+    });
+
+    // تطبيق التنسيقات
+    let win = true;
+    inps.forEach((inp, i) => {
+        inp.classList.add(resultClasses[i]);
+        if (resultClasses[i] !== "yes-in-place") win = false;
+    });
+
+    if (win) {
+        messageArea.innerHTML = "🎉 Excellent Job!";
+        end(true);
+    } else {
+        document.querySelector(`.row-wrapper.try-${currentTry}`).classList.add("disabled-input");
+        inps.forEach(i => i.disabled = true);
+        if (++currentTry <= 6) {
+            const nextRow = document.querySelector(`.row-wrapper.try-${currentTry}`);
+            nextRow.classList.remove("disabled-input");
+            nextRow.querySelectorAll("input").forEach(i => { if(i.value==="") i.disabled=false; });
+            focusNext(); 
+            saveGame();
+        } else { 
+            messageArea.innerHTML = `❌ Game Over! Word: ${wordToGuess}`; 
+            end(false); 
+        }
+    }
+}
+
+// بقية الدوال كما هي مع بعض التحسينات الطفيفة لضمان استقرار اللعبة
 function showInstructions() {
     if (localStorage.getItem("wordle_seen_intro")) return;
-    
     const modal = document.createElement("div");
     modal.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;justify-content:center;align-items:center;z-index:1000;padding:20px;";
     modal.innerHTML = `
-        <div style="background:white;padding:30px;border-radius:15px;max-width:500px;text-align:right;direction:rtl;font-family:sans-serif;box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-            <h2 style="color:#2196F3;margin-top:0;">أهلاً بك في تحدي خمن الكلمة!</h2>
-            <p style="font-size:1.1em;line-height:1.6;">تتحداك اللعبة في تخمين كلمات <strong>باللغة الإنجليزية</strong> حصراً.</p>
-            <p style="color:#673AB7;font-weight:bold;">💡 معلومة: تتوفر اللعبة على أكثر من 30 مجالاً مختلفاً للبحث (طب، هندسة، فضاء، رياضة، وغيرها!)</p>
+        <div style="background:white;padding:30px;border-radius:15px;max-width:500px;text-align:right;direction:rtl;font-family:sans-serif;">
+            <h2 style="color:#2196F3;">أهلاً بك في تحدي خمن الكلمة!</h2>
+            <p>خمن الكلمات بالإنجليزية. تتوفر اللعبة على 30 مجالاً مختلفاً.</p>
             <hr>
-            <p><strong>قواعد اللعبة:</strong></p>
-            <ul style="padding-right:20px;">
-                <li>لديك 6 محاولات لتخمين الكلمة.</li>
-                <li>بمجرد ملء جميع الخانات، سيتم التحقق من إجابتك <strong>تلقائياً</strong>.</li>
-                <li><span style="color:green;font-weight:bold;">الأخضر:</span> الحرف في مكانه الصحيح تماماً.</li>
-                <li><span style="color:orange;font-weight:bold;">الأصفر:</span> الحرف موجود في الكلمة ولكن في مكان آخر.</li>
-                <li><span style="color:grey;font-weight:bold;">الاحمر:</span> الحرف غير موجود نهائياً في الكلمة.</li>
-            </ul>
-            <button id="close-intro" style="background:#2196F3;color:white;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;width:100%;font-size:18px;font-weight:bold;margin-top:10px;">فهمت، ابدأ اللعب!</button>
+            <p><span style="color:green;">الأخضر:</span> صحيح بمكانه.</p>
+            <p><span style="color:orange;">الأصفر:</span> موجود بمكان آخر.</p>
+            <p><span style="color:red;">الأحمر:</span> غير موجود.</p>
+            <button id="close-intro" style="background:#2196F3;color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;width:100%;">ابدأ اللعب</button>
         </div>
     `;
     document.body.appendChild(modal);
-    document.getElementById("close-intro").onclick = () => {
-        modal.remove();
-        localStorage.setItem("wordle_seen_intro", "true");
-    };
+    document.getElementById("close-intro").onclick = () => { modal.remove(); localStorage.setItem("wordle_seen_intro", "true"); };
 }
 
 function saveGame() {
@@ -108,15 +153,12 @@ function initGame(isLoading = false) {
         const rowWrapper = document.createElement("div");
         rowWrapper.className = `row-wrapper try-${i} ${i!==currentTry?'disabled-input':''}`;
         rowWrapper.style = "display:flex; align-items:center; gap:10px; margin-bottom:10px; justify-content:center;";
-
         const label = document.createElement("span");
         label.innerText = `TRY-${i}`;
         label.style = "font-weight:bold; color:#777; font-size:12px; width:45px;";
-        
         const row = document.createElement("div"); 
         row.className = `input-row`;
         row.style = "display:flex; gap:5px;";
-
         for (let j = 1; j <= wordToGuess.length; j++) {
             const inp = document.createElement("input"); 
             inp.id = `i-${i}-${j}`; 
@@ -125,7 +167,6 @@ function initGame(isLoading = false) {
             inp.disabled = (i !== currentTry);
             row.appendChild(inp);
         }
-        
         rowWrapper.appendChild(label);
         rowWrapper.appendChild(row);
         inputContainer.appendChild(rowWrapper);
@@ -141,16 +182,11 @@ function setupLogic() {
             if (!/^[a-zA-Z]$/.test(this.value)) { this.value = ""; return; }
             this.value = this.value.toUpperCase();
             saveGame();
-
             const rowWrapper = this.closest('.row-wrapper');
             const currentRowInputs = Array.from(rowWrapper.querySelectorAll("input"));
             const isRowFilled = currentRowInputs.every(input => input.value !== "");
-
-            if (isRowFilled) {
-                check();
-            } else {
-                jump(idx, "right");
-            }
+            if (isRowFilled) check();
+            else jump(idx, "right");
         };
         inp.onkeydown = (e) => {
             if (e.key === "ArrowRight") jump(idx, "right");
@@ -175,68 +211,44 @@ function focusNext() {
     if (el) el.focus();
 }
 
-function check() {
-    const inps = document.querySelectorAll(`.row-wrapper.try-${currentTry} input`);
-    let temp = wordToGuess.split(""); let win = true;
-    inps.forEach((inp, i) => {
-        if (inp.value === wordToGuess[i]) { inp.classList.add("yes-in-place"); temp[i] = null; }
-        else win = false;
-    });
-    inps.forEach((inp, i) => {
-        if (inp.classList.contains("yes-in-place")) return;
-        let idx = temp.indexOf(inp.value);
-        if (idx !== -1 && inp.value !== "") { inp.classList.add("not-in-place"); temp[idx] = null; }
-        else if (inp.value !== "") inp.classList.add("no");
-    });
-    if (win) { messageArea.innerHTML = "🎉 Excellent Job!"; end(true); }
-    else {
-        document.querySelector(`.row-wrapper.try-${currentTry}`).classList.add("disabled-input");
-        inps.forEach(i => i.disabled = true);
-        if (++currentTry <= 6) {
-            const nextRow = document.querySelector(`.row-wrapper.try-${currentTry}`);
-            nextRow.classList.remove("disabled-input");
-            nextRow.querySelectorAll("input").forEach(i => { if(i.value==="") i.disabled=false; });
-            focusNext(); saveGame();
-        } else { messageArea.innerHTML = `❌ Game Over! Word: ${wordToGuess}`; end(false); }
-    }
-}
-
 function getHint() {
     if (numberOfHints <= 0) return;
     const rowWrapper = document.querySelector(`.row-wrapper.try-${currentTry}`);
     const rowInputs = Array.from(rowWrapper.querySelectorAll("input"));
     const empty = rowInputs.filter(i => i.value === "");
-    
     if (empty.length > 0) {
         numberOfHints--; document.querySelector(".hint span").innerText = numberOfHints;
         const target = empty[Math.floor(Math.random() * empty.length)];
         const idx = rowInputs.indexOf(target);
         target.value = wordToGuess[idx]; target.classList.add("yes-in-place"); target.disabled = true;
-        
-        if (rowInputs.every(input => input.value !== "")) {
-            check();
-        } else {
-            focusNext();
-            saveGame();
-        }
+        if (rowInputs.every(input => input.value !== "")) check();
+        else { focusNext(); saveGame(); }
     }
     if (numberOfHints === 0) hintButton.disabled = true;
 }
 
 function updateFooter() {
     const footer = document.querySelector("footer");
-    footer.innerHTML = `Guess The Word Made By Basel Edition &copy; ${new Date().getFullYear()} | Professional Game`;
+    if(footer) footer.innerHTML = `Guess The Word Made By Basel Edition &copy; ${new Date().getFullYear()} | Professional Game`;
 }
 
 function end(win) {
-    checkButton.disabled = hintButton.disabled = true; localStorage.removeItem("wordle_final_basel");
-    const b = document.createElement("button"); b.className = "restart"; b.innerText = "Play Again";
-    b.onclick = startNewGame; document.querySelector(".message").after(b);
+    checkButton.disabled = hintButton.disabled = true; 
+    localStorage.removeItem("wordle_final_basel");
+    const b = document.createElement("button"); 
+    b.className = "restart"; 
+    b.innerText = "Play Again";
+    b.onclick = startNewGame; 
+    document.querySelector(".message").after(b);
 }
 
+// البدء
 Object.keys(gameData).forEach(c => { const o = document.createElement("option"); o.value = c; o.innerText = c; categorySelect.add(o); });
-categorySelect.onchange = startNewGame; document.getElementById("new-game-btn").onclick = startNewGame;
-checkButton.onclick = check; hintButton.onclick = getHint;
+categorySelect.onchange = startNewGame; 
+if(document.getElementById("new-game-btn")) document.getElementById("new-game-btn").onclick = startNewGame;
+checkButton.onclick = check; 
+hintButton.onclick = getHint;
+
 window.onload = () => { 
     updateFooter(); 
     showInstructions();
