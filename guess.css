@@ -22,9 +22,9 @@ select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.
 }
 
 /* الألوان النهائية */
-.yes-in-place { background-color: #f89e13 !important; color: #fff !important; border-color: #f89e13 !important; }
-.not-in-place { background-color: #18ba89 !important; color: #fff !important; border-color: #18ba89 !important; }
-.no { background-color: #34495e !important; color: #fff !important; border-color: #34495e !important; }
+.yes-in-place { background-color: #12e74e !important; color: #fff !important; border-color: #f89e13 !important; }
+.not-in-place { background-color: #e1ab14 !important; color: #fff !important; border-color: #18ba89 !important; }
+.no { background-color: #d95022 !important; color: #fff !important; border-color: #34495e !important; }
 
 .disabled-input { opacity: 0.6; pointer-events: none; }
 
@@ -37,8 +37,8 @@ select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.
 .key-colors { display: flex; flex-direction: column; gap: 12px; min-width: 130px; background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 .key-color { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: bold; }
 .key { width: 16px; height: 16px; border-radius: 4px; }
-.key.in-place { background: #f89e13; }
-.key.not-in-place { background: #18ba89; }
+.key.in-place { background: #12e74e; }
+.key.not-in-place { background: #d95022 ; }
 .key.no { background: #34495e; }
 
 footer { background: #2c3e50; color: #fff; padding: 15px; text-align: center; width: 100%; font-size: 0.85rem; border-top: 4px solid #f89e13; margin-top: 20px; }
