@@ -56,7 +56,7 @@ function showInstructions() {
                 <li>بمجرد ملء جميع الخانات، سيتم التحقق من إجابتك <strong>تلقائياً</strong>.</li>
                 <li><span style="color:green;font-weight:bold;">الأخضر:</span> الحرف في مكانه الصحيح تماماً.</li>
                 <li><span style="color:orange;font-weight:bold;">الأصفر:</span> الحرف موجود في الكلمة ولكن في مكان آخر.</li>
-                <li><span style="color:grey;font-weight:bold;">الرمادي:</span> الحرف غير موجود نهائياً في الكلمة.</li>
+                <li><span style="color:grey;font-weight:bold;">الاحمر:</span> الحرف غير موجود نهائياً في الكلمة.</li>
             </ul>
             <button id="close-intro" style="background:#2196F3;color:white;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;width:100%;font-size:18px;font-weight:bold;margin-top:10px;">فهمت، ابدأ اللعب!</button>
         </div>
