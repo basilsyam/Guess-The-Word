@@ -1,5 +1,5 @@
 const gameData = {
-    // تم الإبقاء على كافة المجالات كما هي
+   // Here are all the words
     "Medicine": ["BIOPSY", "PLASMA", "ENZYME", "GLUCOSE", "PLATELET", "ALBUMIN", "REAGENT", "CULTURE", "PIPETTE", "SEROLOGY", "LIPIDS", "SEPSIS", "ANEMIA", "SYRINGE", "LANCET", "IMMUNE", "SUTURES", "TRAUMA", "CANULA", "DIALYSIS"],
     "Engineering": ["CIRCUIT", "VOLTAGE", "BATTERY", "SENSOR", "CURRENT", "TURBINE", "RESISTOR", "DIODE", "TRANSISTOR", "WATTAGE", "GRID", "SOLAR", "ROBOTICS", "SIGNAL", "MOTORS", "ENGINE", "TORQUE", "WIRING", "PANEL", "SAFETY"],
     "Software": ["FRONTEND", "BACKEND", "DATABASE", "VARIABLE", "FUNCTION", "ITERATION", "COMPILER", "DEBUGGING", "FRAMEWORK", "RECURSION", "PROTOCOL", "INSTANCE", "ABSTRACT", "INTERFACE", "SOFTWARE", "HARDWARE", "TERMINAL", "DECODER", "ENCRYPTION", "NETWORK"],
@@ -34,7 +34,7 @@ const gameData = {
 
 let wordToGuess = ""; 
 let currentTry = 1; 
-let numberOfHints = 2;
+let numberOfHints = 3;
 const inputContainer = document.querySelector(".input-container");
 const categorySelect = document.getElementById("category-select");
 const checkButton = document.querySelector(".check");
@@ -47,7 +47,6 @@ function check() {
     const guessArr = Array.from(inps).map(i => i.value.toUpperCase());
     const targetArr = wordToGuess.split("");
     const resultClasses = new Array(guessArr.length).fill("no"); // افتراضياً الحرف غير موجود
-
     // المرحلة الأولى: تحديد الأماكن الصحيحة (الأخضر)
     guessArr.forEach((char, i) => {
         if (char === targetArr[i]) {
@@ -55,7 +54,6 @@ function check() {
             targetArr[i] = null; // استهلاك الحرف من الكلمة الهدف
         }
     });
-
     // المرحلة الثانية: تحديد الأماكن الخاطئة (الأصفر)
     guessArr.forEach((char, i) => {
         if (resultClasses[i] !== "yes-in-place") {
@@ -66,7 +64,6 @@ function check() {
             }
         }
     });
-
     // تطبيق التنسيقات
     let win = true;
     inps.forEach((inp, i) => {
@@ -84,7 +81,7 @@ function check() {
             const nextRow = document.querySelector(`.row-wrapper.try-${currentTry}`);
             nextRow.classList.remove("disabled-input");
             nextRow.querySelectorAll("input").forEach(i => { if(i.value==="") i.disabled=false; });
-            focusNext(); 
+            focusNext();  
             saveGame();
         } else { 
             messageArea.innerHTML = `❌ Game Over! Word: ${wordToGuess}`; 
